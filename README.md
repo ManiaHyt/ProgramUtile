@@ -8,7 +8,7 @@ windows :
 
 - pip install PyQt5 moviepy pytubefix
 
-mac :
+mac (dans le répertoire ProgramUtile):
 - python3 -m venv venv
 - source venv/bin/activate
 - pip install PyQt5 moviepy pytubefix

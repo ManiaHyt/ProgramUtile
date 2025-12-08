@@ -8,6 +8,6 @@ windows :
 - pip install PyQt5 moviepy pytubefix
 
 mac :
-python3 -m venv venv
-source venv/bin/activate
-pip install PyQt5 moviepy pytubefix
+- python3 -m venv venv
+- source venv/bin/activate
+- pip install PyQt5 moviepy pytubefix

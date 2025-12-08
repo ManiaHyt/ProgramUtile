@@ -4,5 +4,10 @@ Ce repertoire réunie plusieurs petits programmes utile de tous les jours :
 - YoutubeDownloader+ : Poragmme pour télecharger des extrait de vidéo youtube
 
 <h2> - commande à lancer : </h2>
-
+windows :
 - pip install PyQt5 moviepy pytubefix
+
+mac :
+python3 -m venv venv
+source venv/bin/activate
+pip install PyQt5 moviepy pytubefix

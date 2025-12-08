@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QLineEdit, QPushButton, QRadioButton, QComboBox, QMessageBox
 from PyQt5.QtCore import pyqtSlot
 from YoutubeDownloaderFunctions import download_video, list_all_resolutions, ensure_directory_exists, validate_timecode, download_audio
-from pytube import YouTube
+from pytubefix import YouTube
 
 class YoutubeDownloaderGUI(QMainWindow):
     def __init__(self):
@@ -69,7 +69,7 @@ class YoutubeDownloaderGUI(QMainWindow):
 
     @pyqtSlot()
     def download_audio(self):
-        url = self.url_input.text()
+        url = self.url_input.text().strip()
         if url:
             output_folder = ensure_directory_exists("Downloads")
             audio_path = download_audio(url, output_folder)
@@ -92,26 +92,40 @@ class YoutubeDownloaderGUI(QMainWindow):
     @pyqtSlot()
     def validate_url(self):
         url = self.url_input.text()
-        if url:
+        if not url:
+            QMessageBox.warning(self, "Erreur", "Veuillez entrer une URL valide.")
+            return
+
+        try:
             yt = YouTube(url)
+            # Forcer la vérification de la disponibilité pour déclencher une erreur si la vidéo n'est pas accessible
+            yt.check_availability()
             resolutions = list_all_resolutions(yt)
             self.resolution_combobox.clear()
             self.resolution_combobox.addItems(resolutions)
             self.resolution_combobox.setEnabled(True)
-        else:
-            QMessageBox.warning(self, "Erreur", "Veuillez entrer une URL valide.")
+            QMessageBox.information(self, "Succès", "URL validée. Vous pouvez maintenant sélectionner une résolution.")
+        except Exception as e:
+            self.resolution_combobox.clear()
+            self.resolution_combobox.setDisabled(True)
+            QMessageBox.critical(self, "Erreur de validation", f"L'URL est invalide ou la vidéo n'est pas accessible.\nErreur: {e}")
 
     def download_video(self):
         url = self.url_input.text()
         start_time = self.start_time_input.text() if self.start_time_input.isEnabled() else None
         end_time = self.end_time_input.text() if self.end_time_input.isEnabled() else None
         resolution = self.resolution_combobox.currentText()
-        full_video = self.full_video_radio.isChecked()
 
-        if url and (full_video or (validate_timecode(start_time) and validate_timecode(end_time))):
+        is_full_video = self.full_video_radio.isChecked()
+        is_valid_clip = not is_full_video and validate_timecode(start_time) and validate_timecode(end_time)
+
+        if url and (is_full_video or is_valid_clip):
             output_folder = ensure_directory_exists("Downloads")
-            download_video(url, output_folder, resolution, full_video, start_time, end_time)
-            QMessageBox.information(self, "Téléchargement", "La vidéo a été téléchargée avec succès.")
+            try:
+                download_video(url, output_folder, resolution, is_full_video, start_time, end_time)
+                QMessageBox.information(self, "Téléchargement", "La vidéo a été téléchargée avec succès.")
+            except Exception as e:
+                QMessageBox.critical(self, "Erreur de téléchargement", f"Une erreur est survenue lors du téléchargement.\nErreur: {e}")
         else:
             QMessageBox.warning(self, "Erreur", "Veuillez remplir correctement tous les champs requis.")
 

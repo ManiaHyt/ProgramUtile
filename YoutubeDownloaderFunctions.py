@@ -1,6 +1,6 @@
 from moviepy.audio.io.AudioFileClip import AudioFileClip
-from pytube import YouTube
-from moviepy.editor import VideoFileClip
+from pytubefix import YouTube
+from moviepy import VideoFileClip
 import os
 import re
 
